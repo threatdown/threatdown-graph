@@ -1,0 +1,45 @@
+# This file is managed by code-skeleton. Do not make changes.
+# ignore everything in the root
+/*
+
+# keep these
+!**/.gitignore
+!/.devcontainer/
+!/.eslintrc.js
+!/.github/
+!/.gitignore
+!/.npmrc
+!/Dockerfile
+!/bin/
+!/CHANGELOG*
+!/docs/
+!/knexfile.ts
+!/lib/
+!/migrations/
+!/LICENSE*
+!/package.json
+!/README*
+!/scripts/
+!/seeds/
+!/tap-snapshots/
+!/test/
+!/tsconfig*.json
+
+# re-ignore typescript output artifacts
+/knexfile.js
+/knexfile.d.ts
+/bin/**/*.js
+/bin/**/*.d.ts
+/lib/**/*.js
+/lib/**/*.d.ts
+/migrations/**/*.js
+/migrations/**/*.d.ts
+/scripts/**/*.js
+/scripts/**/*.d.ts
+/seeds/**/*.js
+/seeds/**/*.d.ts
+/test/**/*.js
+/test/**/*.d.ts
+
+# make sure we keep type defs for external libs
+!/lib/types/*/*.d.ts

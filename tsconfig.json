@@ -1,0 +1,14 @@
+{
+  "//": "This file is partially managed by code-skeleton. Changes may be overwritten.",
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "include": [
+    "**/*.ts",
+    ".eslintrc.js"
+  ],
+  "compilerOptions": {
+    "typeRoots": [
+      "./node_modules/@types",
+      "./lib/types"
+    ]
+  }
+}
