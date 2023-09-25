@@ -23,7 +23,7 @@ start =
   { return o; }
 
 Objective = EOL? "__" line:(!EOL !"__" c:. { return c; })+ "__" EOL?
-  children:( INDENT c:Child* DEDENT { return c; })? EOL*
+  children:( indent:INDENT? c:Child* dedent:DEDENT? { return c; })? EOL*
   { return createObjective(line.join(""), children) }
 
 Condition =
@@ -43,7 +43,7 @@ EOL = "\r\n" / "\n"
 SAME_INDENT = i:[ \t]* &{ return i.length == indent.length; }
 
 INDENT = &(i:[ \t]+ &{ return i.length > indent.length; }
-  { indentStack.push(indent); indent = i.join(""); pos = offset; })
+  { indentStack.push(indent); indent = i.join(""); pos = offset; return indent; })
 
-DEDENT = &"" { indent = indentStack.pop(); }
+DEDENT = &"" { indent = indentStack.pop(); return indent; }
 
