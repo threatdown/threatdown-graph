@@ -47,9 +47,25 @@ export function compileToMermaid (tree: Node): string {
     if (node.objective) {
       addLine(`${identifier(false)}{${node.objective}}`);
     } else if (node.condition) {
-      addLine(`${previousIdentifier()}---${identifier(true)}(${node.condition})`);
+      if (node.mitigation) {
+        if (node.complete) {
+          addLine(`${previousIdentifier()}-- mitigated by ---${identifier(true)}(${node.condition})`);
+        } else {
+          addLine(`${previousIdentifier()}-. mitigated by .-${identifier(true)}(${node.condition})`);
+        }
+      } else {
+        addLine(`${previousIdentifier()}---${identifier(true)}(${node.condition})`);
+      }
     } else if (node.assumption) {
-      addLine(`${previousIdentifier()}---${identifier(true)}>${node.assumption}]`);
+      if (node.mitigation) {
+        if (node.complete) {
+          addLine(`${previousIdentifier()}-- mitigated by ---${identifier(true)}>${node.assumption}]`);
+        } else {
+          addLine(`${previousIdentifier()}-. mitigated by .-${identifier(true)}>${node.assumption}]`);
+        }
+      } else {
+        addLine(`${previousIdentifier()}---${identifier(true)}>${node.assumption}]`);
+      }
     }
 
     const orCount = node.or?.length ?? 0;
