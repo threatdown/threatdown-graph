@@ -15,6 +15,7 @@ Threatdown is an open standard that can be interpreted into a [mermaid](https://
 Threatdown looks like this:
 
 ```threatdown
+
 __Root attacker goal__
 - method which in order to be viable
   + requires both this condition to be true
