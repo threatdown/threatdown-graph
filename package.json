@@ -1,5 +1,5 @@
 {
-  "name": "@code4rena/threatdown-graph",
+  "name": "@code4rena/threatdown",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
