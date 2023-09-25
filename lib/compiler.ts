@@ -52,22 +52,40 @@ export function compileToMermaid (tree: Node): string {
       addLine(`${previousIdentifier()}---${identifier(true)}>${node.assumption}]`);
     }
 
-    if (node.or?.length) {
+    const orCount = node.or?.length ?? 0;
+    if (orCount === 1) {
+      indent();
+      // non-null assertion safe due to length check above
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      addNode(node.or![0]);
+      dedent();
+    } else if (orCount > 1) {
       indent();
       addLine(`${previousIdentifier()}---${identifier(true)}(((OR)))`);
       indent();
-      for (const child of node.or) {
+      // non-null assertion safe due to length check above
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      for (const child of node.or!) {
         addNode(child);
       }
       dedent();
       dedent();
     }
 
-    if (node.and?.length) {
+    const andLength = node.and?.length ?? 0;
+    if (andLength === 1) {
+      indent();
+      // non-null assertion safe due to length check above
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      addNode(node.and![0]);
+      dedent();
+    } else if (andLength > 1) {
       indent();
       addLine(`${previousIdentifier()}---${identifier(true)}(((AND)))`);
       indent();
-      for (const child of node.and) {
+      // non-null assertion safe due to length check above
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      for (const child of node.and!) {
         addNode(child);
       }
       dedent();
