@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>threatdown // friendly notation for threat modeling</title>
+    <meta property="og:url" content="https://threatdown.xyz" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="threatdown" />
+    <meta property="og:description" content="friendly attack tree notation for threat modeling" />
+    <meta property="og:image" content="" />
+    <link rel="icon" href="" /> 
+    <link rel="apple-touch-icon" href="" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DM%20Mono" />
+    <link rel="stylesheet" type="text/css" href="/main.css">
+  </head>
+  <body>
+    <header>
+      <h1>threatdown</h1>
+      <h2>
+        friendly notation for <a href="#what-is-threat-modeling" title="What’s threat modeling?">threat models</a>
+      </h2>
+      <!-- <nav><a href="">GitHub</a> | <a href="">blog post</a></nav> -->
+    </header>
+    <main>
+      <p><strong>threatdown</strong> is an open standard empowering teams and security experts to build threat modeling into all phases of development.</p>
+      <ul>
+        <li><strong>familiar:</strong> easy to learn for everyone who already knows markdown</li>
+        <li><strong>simple:</strong> constrained to keep focused on what matters most</li>
+        <li><strong>empowering:</strong> compiles to visual graphs thanks to <a href="https://mermaid.js.org/">mermaid.js</a></li>
+        <li><strong>maintainable:</strong> plain text makes collaboration and updating easy</li>
+        
+      </ul>
+
+      <h2>How it works</h2>
+     
+      <p>Threatdown is a markdown-ish bulleted outline describing attack vectors using <strong>conditions</strong>, <strong>assumptions</strong>, and <strong>mitigations</strong> combined by boolean logic:</p>
+      <ul>
+        <li><strong>conditions</strong> can be actions or states</li>
+        <li><strong>assumptions</strong> are indicated by a bullet ending in <code>?</code></li>
+        <li><strong>mitigations</strong> block a condition or assumption</li>
+        <li>mitigations can be shown as <strong>complete</strong> <code>[x]</code> or <strong>incomplete</strong> <code>[ ]</code></li>
+        <li>elements can be logically combined using <strong>AND</strong> <code>+</code> <strong>OR</strong> <code>-</code> bullets</li>
+        <li><strong>comments</strong> can be nested under any item with a <code>></code></li>
+      </ul>
+
+      <h2>How it looks</h2>
+
+<pre><code>__Attacker's goal__
+  - method which in order to be viable
+    + requires this condition to be true
+    + and this condition which depends on either
+      - x to be true
+      - or y to be true
+    + hey this condition must be true too
+      + [ ] but this would prevent it
+  - another method here too
+    - a condition which depends on assumptions
+      +? this might be a problem
+        - [x] prevents it, though
+      +? but only if this happens
+        -? which assumes this also happens
+           > You can make inline comments as well 
+           > in order to further explain</code></pre>
+
+      <h2>Generating graphs</h2>
+      <p>Run a simple command to generate a visualization of your threatdown tree:</p>
+      <pre><code>npx @code4rena/threatdown inputfile</code></pre>
+      <p>You’ll get:</p>
+      <img class="example" src="/threatdown-example.svg" />
+
+      <h2>Contributing</h2>
+      <p><strong>threatdown</strong> is an open standard inviting anyone to help develop, extend, and improve it.</p>
+      <p><a href="">Join us on GitHub</a>.</p>
+      
+    </main>
+    <aside id="what-is-threat-modeling">
+      <div>
+        <h2 id="what-is-threat-modeling">What’s threat modeling?</h2>
+        <p>Threat modeling documents your project’s risks from the vantage point of an attacker.</p>
+        <blockquote>
+          <p>
+            “Defenders think in lists.<br/> 
+            Attackers think in graphs.<br/>
+            As long as this is true, attackers win.”
+          </p>
+          <p>
+            —<a href="https://medium.com/@johnlatwc/defenders-mindset-319854d10aaa">John Lambert</a>
+          </p>
+        </blockquote>
+      <p>Good threat models empower all levels of an organization to think about, talk about, and prioritize security throughout all phases of the software development lifecycle.</p>
+      </div>
+    </aside>
+    </footer>
+      <a class="logo" href="https://code4rena.com">from <img src="https://raw.githubusercontent.com/code-423n4/media-kit/main/code4rena-logo.png"></a>
+    </footer>
+  </body>
+</html>
