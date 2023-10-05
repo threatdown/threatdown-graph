@@ -1,114 +1,153 @@
-export interface Objective {
-  objective: string;
-
-  and?: Child[];
-  or?: Child[];
-  comments?: string[];
+export type BooleanInput = "-" | "+";
+export type BooleanOutput = "or" | "and";
+export function parseBoolean(operation: BooleanInput): BooleanOutput {
+  return operation === "-" ? "or" : "and";
 }
 
-export interface Condition {
-  condition: string;
-  and?: Child[];
-  or?: Child[];
-  comments?: string[];
-  mitigation?: boolean;
-  complete?: boolean;
+export type MitigationInput = "[ ]" | "[x]" | "[X]";
+export interface MitigationOutput {
+  mitigation: true;
+  complete: boolean;
 }
+export function parseMitigation(mitigation?: MitigationInput): MitigationOutput | undefined {
+  if (!mitigation) {
+    return undefined;
+  }
 
-export interface Assumption {
-  assumption: string;
-  and?: Child[];
-  or?: Child[];
-  comments?: string[];
-  mitigation?: boolean;
-  complete?: boolean;
-}
-
-export type Child = Assumption | Condition;
-
-export function createObjective (name: string, children?: RawCondition[]): Objective {
-  const result: Objective = {
-    objective: name,
+  const result: MitigationOutput = {
+    mitigation: true,
+    complete: mitigation !== "[ ]",
   };
 
-  if (children?.length) {
-    Object.assign(result, mergeConditions(children));
+  return result;
+}
+
+export interface RawChild {
+  and?: Child;
+  or?: Child;
+  comment?: string;
+}
+export interface RawChildren {
+  and?: Child[];
+  or?: Child[];
+  comments?: string[];
+}
+export function parseChildren(children?: RawChild[]): RawChildren {
+  const result: RawChildren = {};
+  if (!children) {
+    return result;
+  }
+
+  for (const child of children) {
+    if (child.and) {
+      result.and = result.and ?? [];
+      result.and.push(child.and);
+    }
+
+    if (child.or) {
+      result.or = result.or ?? [];
+      result.or.push(child.or);
+    }
+
+    if (child.comment) {
+      result.comments = result.comments ?? [];
+      result.comments.push(child.comment);
+    }
   }
 
   return result;
 }
 
-export function createComment (comment: string): { comment: string } {
-  return { comment };
-}
-
-export interface ParsedCondition {
-  boolean: "-" | "+";
-  isAssumption?: "?";
-  isMitigation?: "[ ]" | "[x]" | "[X]";
-  children?: RawCondition[];
+export interface ChildInput {
   line: string;
+  boolean: BooleanInput;
+  children?: RawChild[];
+  mitigation?: MitigationInput;
 }
 
-export function createChild ({ boolean, isAssumption, line, children, isMitigation }: ParsedCondition): Child {
-  const bool = boolean === "-" ? "or" : "and";
+export interface Assumption {
+  assumption: string;
+  comments?: string[];
+  mitigation?: boolean;
+  complete?: boolean;
+}
 
-  const parsedMessage = isAssumption === "?"
-    ? { assumption: line }
-    : { condition: line };
+// TODO: this should require that one of these keys is set, but never more or less than 1
+export interface AssumptionChild {
+  and?: Assumption;
+  or?: Assumption;
+}
 
-  const parsedMitigation = isMitigation
-    ? isMitigation === "[ ]"
-      ? { mitigation: true, complete: false }
-      : { mitigation: true, complete: true }
-    : {};
+export function createAssumption({ line, boolean, mitigation, children }: ChildInput): AssumptionChild {
+  const parsedLine = parseLine(line);
+  const parsedBoolean = parseBoolean(boolean);
+  const parsedMitigation = parseMitigation(mitigation);
+  const parsedChildren = parseChildren(children);
 
-  const parsedChildren = children
-    ? mergeConditions(children)
-    : {};
-
-  const result: unknown = {
-    [bool]: {
-      ...parsedMessage,
+  const result: AssumptionChild = {
+    [parsedBoolean]: {
+      assumption: parsedLine,
       ...parsedMitigation,
       ...parsedChildren,
     },
   };
 
-  return result as Child;
+  return result;
 }
 
-interface RawCondition {
-  or?: Condition;
-  and?: Condition;
-  comment?: string;
-}
-
-interface MergedConditions {
-  and?: Condition[];
-  or?: Condition[];
+export interface Condition {
+  condition: string;
   comments?: string[];
+  mitigation?: boolean;
+  complete?: boolean;
 }
 
-export function mergeConditions (conditions: RawCondition[]): MergedConditions {
-  const result: MergedConditions = {};
+// TODO: this should require that one of these keys is set, but never more or less than 1
+export interface ConditionChild {
+  and?: Condition;
+  or?: Condition;
+}
 
-  for (const condition of conditions) {
-    if (condition.and) {
-      result.and = result.and ?? [];
-      result.and.push(condition.and);
-    }
+export function createCondition({ line, boolean, mitigation, children }: ChildInput): ConditionChild {
+  const parsedLine = parseLine(line);
+  const parsedBoolean = parseBoolean(boolean);
+  const parsedMitigation = parseMitigation(mitigation);
+  const parsedChildren = parseChildren(children);
 
-    if (condition.or) {
-      result.or = result.or ?? [];
-      result.or.push(condition.or);
-    }
+  return {
+    [parsedBoolean]: {
+      condition: parsedLine,
+      ...parsedMitigation,
+      ...parsedChildren,
+    },
+  };
+}
 
-    if (condition.comment) {
-      result.comments = result.comments ?? [];
-      result.comments.push(condition.comment);
-    }
+export type Child = AssumptionChild | ConditionChild;
+
+export interface Objective {
+  objective: string;
+  comments?: string[];
+  and?: Child[];
+  or?: Child[];
+}
+
+export interface ObjectiveInput {
+  line: string;
+  children?: RawChild[];
+}
+
+export function createObjective({ line, children }: ObjectiveInput): Objective {
+  return {
+    objective: parseLine(line),
+    ...parseChildren(children),
+  };
+}
+
+export function parseLine (line: string | string[]): string {
+  if (Array.isArray(line)) {
+    return line.join("");
   }
 
-  return result;
+  return line;
 }

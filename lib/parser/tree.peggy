@@ -6,8 +6,8 @@
 
   const { join } = require('path');
   const {
-    createChild,
-    createComment,
+    createAssumption,
+    createCondition,
     createObjective,
   } = require('./helpers.js');
 }}
@@ -19,24 +19,45 @@
 }
 
 start =
-  o:Objective
-  { return o; }
+  objective:Objective
+  { return objective; }
 
-Objective = EOL? "__" line:(!EOL !"__" c:. { return c; })+ "__" EOL?
-  children:( indent:INDENT? c:Child* dedent:DEDENT? { return c; })? EOL*
-  { return createObjective(line.join(""), children) }
+Objective =
+  EOL* "__" line:(!EOL !"__" char:. { return char })+ "__" EOL*
+  children:(IndentedChildren / SameIndentChildren)? EOL*
+  { return createObjective({ line, children }) }
+
+Assumption =
+  SAME_INDENT boolean:Boolean "?" WS mitigation:Mitigation? line:LineToEnd EOL?
+  children:IndentedChildren? EOL*
+  { return createAssumption({ boolean, mitigation, line, children }) }
 
 Condition =
-  SAME_INDENT boolean:[-+] isAssumption:"?"? ws* isMitigation:("[ ]" / "[x]" / "[X]")? ws* line:(!EOL c:. { return c })+ EOL?
-  children:(INDENT c:Child* DEDENT { return c })?
-  { return createChild({ boolean, isAssumption, line: line.join(""), children, isMitigation }) }
+  SAME_INDENT boolean:Boolean WS mitigation:Mitigation? line:LineToEnd EOL?
+  children:IndentedChildren? EOL*
+  { return createCondition({ boolean, mitigation, line, children }) }
 
-Comment = SAME_INDENT ">" ws* comment:(!EOL c:. { return c })+ EOL?
-  { return createComment(comment.join("")) }
+Comment =
+  SAME_INDENT ">" WS comment:LineToEnd EOL?
+  { return { comment } }
 
-Child = Condition / Comment
+IndentedChildren =
+  INDENT child:(Child)+ DEDENT
+  { return child }
 
-ws = " " / "\t"
+SameIndentChildren =
+  child:(Child)+
+  { return child }
+
+Child = Assumption / Condition / Comment
+
+Boolean = "-" / "+"
+
+Mitigation = "[ ]" / "[x]" / "[X]"
+
+LineToEnd = (!EOL char:. { return char })+
+
+WS = [ \t]*
 
 EOL = "\r\n" / "\n"
 
@@ -46,4 +67,3 @@ INDENT = &(i:[ \t]+ &{ return i.length > indent.length; }
   { indentStack.push(indent); indent = i.join(""); pos = offset; return indent; })
 
 DEDENT = &"" { indent = indentStack.pop(); return indent; }
-
