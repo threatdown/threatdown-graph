@@ -64,6 +64,10 @@ main h2 {
   margin-top: 100px;
 }
 
+aside h2 {
+  margin-top: 50px;
+}
+
 aside {
   margin: 100px 0;
   background: #1d1b26;
