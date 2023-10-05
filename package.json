@@ -44,6 +44,10 @@
       "library": "true"
     }
   },
+  "tap": {
+    "coverage": true,
+    "ts": true
+  },
   "files": [
     "bin/**/*.js",
     "lib/**/*.js",
