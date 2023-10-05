@@ -1,6 +1,6 @@
 @font-face {
   font-family: Satoshi Variable;
-  src: url(/fonts/Satoshi-Variable.woff2) format("woff2"),url(/fonts/Satoshi-Variable.woff) format("woff"),url(/fonts/Satoshi-Variable.ttf) format("truetype");
+  src: url(fonts/Satoshi-Variable.woff2) format("woff2"),url(fonts/Satoshi-Variable.woff) format("woff"),url(fonts/Satoshi-Variable.ttf) format("truetype");
 }
 
 body {
