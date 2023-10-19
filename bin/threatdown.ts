@@ -6,6 +6,7 @@ import { parseArgs } from "node:util";
 import {
   parse,
   compileToMermaid,
+  renderMermaid,
 } from "../lib";
 
 const {
@@ -20,6 +21,7 @@ const {
     },
     outputType: {
       type: "string",
+      alias: "type",
       short: "t",
       default: "mermaid",
     },
@@ -34,11 +36,11 @@ function usage () {
 `);
 }
 
-function main () {
+async function main () {
   const inputFile = positionals.shift();
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (!inputFile || !["json", "mermaid"].includes(values.outputType!)) {
+  if (!inputFile || !["json", "mermaid", "svg"].includes(values.outputType!)) {
     usage();
   } else {
     const fileContent = readFileSync(resolve(process.cwd(), inputFile), { encoding: "utf8" });
@@ -59,8 +61,22 @@ function main () {
       } else {
         console.log(mermaidContent);
       }
+      return;
+    }
+
+    const svgContent = await renderMermaid(mermaidContent);
+    if (values.outputType === "svg") {
+      if (values.output) {
+        writeFileSync(resolve(process.cwd(), values.output), svgContent);
+      } else {
+        console.log(svgContent);
+      }
     }
   }
 }
 
-main();
+main()
+  .catch((err: Error) => {
+    process.exitCode = 1;
+    console.error(err.stack);
+  });

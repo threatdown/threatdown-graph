@@ -53,5 +53,8 @@
     "lib/**/*.js",
     "lib/**/*.d.ts",
     "!lib/types/**"
-  ]
+  ],
+  "dependencies": {
+    "mermaid-cli": "^0.2.4"
+  }
 }
