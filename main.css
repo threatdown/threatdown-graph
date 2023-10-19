@@ -1,20 +1,27 @@
 @font-face {
   font-family: Satoshi Variable;
-  src: url(fonts/Satoshi-Variable.woff2) format("woff2"),url(fonts/Satoshi-Variable.woff) format("woff"),url(fonts/Satoshi-Variable.ttf) format("truetype");
+  src: url(fonts/Satoshi-Variable.woff2) format("woff2"),
+    url(fonts/Satoshi-Variable.woff) format("woff"),
+    url(fonts/Satoshi-Variable.ttf) format("truetype");
 }
 
 body {
+  margin: 0;
   font-family: "Satoshi Variable", sans-serif;
   line-height: 1.5;
   background: #0c0b0e;
   color: #adabb2;
 }
 
-h2, p, li {
+h2,
+p,
+li {
   font-family: "Satoshi Variable", sans-serif;
 }
 
-header, main, aside div {
+header,
+main,
+aside div {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -23,24 +30,22 @@ header, main, aside div {
 header {
   margin: 100px auto 50px auto;
   text-align: center;
-  
 }
 
 h1 {
   font-family: "DM Mono", monospace;
-  font-weight: 100; 
-  color: #7f63ef;
+  font-weight: 500;
+  color: #fff;
   font-size: 50px;
   margin-bottom: 0;
-  font-weight: 700;
 }
 
 h2 {
-  color: #7f63ef;
+  color: #fff;
 }
 
-h2 a:link, h2 a:visited {
-  color: #7f63ef;
+h2 a:link,
+h2 a:visited {
   text-decoration: none;
   border-bottom: 1px solid #7f63ef;
   margin-bottom: -5px;
@@ -51,13 +56,15 @@ header h2 {
   font-weight: 300;
 }
 
-a:link, a:visited {
-  color: #fff;
+a:link,
+a:visited {
+  color: #7f63ef;
 }
 
 main {
   max-width: 800px;
   margin: 100px auto 50px auto;
+  padding: 20px;
 }
 
 main h2 {
@@ -65,16 +72,17 @@ main h2 {
 }
 
 aside h2 {
-  margin-top: 50px;
+  margin-top: 0px;
 }
 
 aside {
   margin: 100px 0;
   background: #1d1b26;
-  padding: 50px 0;
+  padding: 80px 20px;
 }
 
-p, li {
+p,
+li {
   font-size: 20px;
   font-weight: 300;
 }
@@ -94,6 +102,7 @@ li code {
 }
 
 pre {
+  overflow: auto;
   font-size: 18px;
   background: #1d1b26;
   color: #ccc;
@@ -119,7 +128,7 @@ pre {
 }
 
 .logo img {
-  margin-left: 5px; 
+  margin-left: 5px;
   width: 100px;
   position: relative;
   top: 5px;
