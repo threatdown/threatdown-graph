@@ -28,14 +28,14 @@ Objective =
   { return createObjective({ line, children }) }
 
 Assumption =
-  SAME_INDENT boolean:Boolean "?" WS mitigation:Mitigation? line:LineToEnd EOL?
+  SAME_INDENT boolean:Boolean "?" WS mitigation:Mitigation? WS probability:Probability? line:LineToEnd EOL?
   children:IndentedChildren? EOL*
-  { return createAssumption({ boolean, mitigation, line, children }) }
+  { return createAssumption({ boolean, mitigation, probability, line, children }) }
 
 Condition =
-  SAME_INDENT boolean:Boolean WS mitigation:Mitigation? line:LineToEnd EOL?
+  SAME_INDENT boolean:Boolean WS mitigation:Mitigation? WS probability:Probability? line:LineToEnd EOL?
   children:IndentedChildren? EOL*
-  { return createCondition({ boolean, mitigation, line, children }) }
+  { return createCondition({ boolean, mitigation, probability, line, children }) }
 
 Comment =
   SAME_INDENT ">" WS comment:LineToEnd EOL?
@@ -54,6 +54,8 @@ Child = Assumption / Condition / Comment
 Boolean = "-" / "+"
 
 Mitigation = "[ ]" / "[x]" / "[X]"
+
+Probability = "(high)" / "(H)" / "(medium)" / "(M)" / "(low)" / "(L)"
 
 LineToEnd = (!EOL char:. { return char })+
 

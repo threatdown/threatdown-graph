@@ -22,6 +22,30 @@ export function parseMitigation(mitigation?: MitigationInput): MitigationOutput 
   return result;
 }
 
+export type ProbabilityInput = "(high)" | "(H)" | ("medium") | "(M)" | "(low)" | "(L)";
+export interface ProbabilityOutput {
+  probability: "high" | "medium" | "low";
+}
+export function parseProbability(probability?: ProbabilityInput): ProbabilityOutput | undefined {
+  if (!probability) {
+    return undefined;
+  }
+
+  if (["(high)", "(H)"].includes(probability)) {
+    return { probability: "high" };
+  }
+
+  if (["(medium)", "(M)"].includes(probability)) {
+    return { probability: "medium" };
+  }
+
+  if (["(low)", "(L)"].includes(probability)) {
+    return { probability: "low" };
+  }
+
+  return undefined;
+}
+
 export interface RawChild {
   and?: Child;
   or?: Child;
@@ -63,12 +87,14 @@ export interface ChildInput {
   boolean: BooleanInput;
   children?: RawChild[];
   mitigation?: MitigationInput;
+  probability?: ProbabilityInput;
 }
 
 export interface Assumption {
   assumption: string;
   comments?: string[];
   mitigation?: boolean;
+  probability?: "high" | "medium" | "low";
   complete?: boolean;
 }
 
@@ -78,16 +104,18 @@ export interface AssumptionChild {
   or?: Assumption;
 }
 
-export function createAssumption({ line, boolean, mitigation, children }: ChildInput): AssumptionChild {
+export function createAssumption({ line, boolean, mitigation, probability, children }: ChildInput): AssumptionChild {
   const parsedLine = parseLine(line);
   const parsedBoolean = parseBoolean(boolean);
   const parsedMitigation = parseMitigation(mitigation);
+  const parsedProbability = parseProbability(probability);
   const parsedChildren = parseChildren(children);
 
   const result: AssumptionChild = {
     [parsedBoolean]: {
       assumption: parsedLine,
       ...parsedMitigation,
+      ...parsedProbability,
       ...parsedChildren,
     },
   };
@@ -99,6 +127,7 @@ export interface Condition {
   condition: string;
   comments?: string[];
   mitigation?: boolean;
+  probability?: "high" | "medium" | "low";
   complete?: boolean;
 }
 
@@ -108,16 +137,18 @@ export interface ConditionChild {
   or?: Condition;
 }
 
-export function createCondition({ line, boolean, mitigation, children }: ChildInput): ConditionChild {
+export function createCondition({ line, boolean, mitigation, probability, children }: ChildInput): ConditionChild {
   const parsedLine = parseLine(line);
   const parsedBoolean = parseBoolean(boolean);
   const parsedMitigation = parseMitigation(mitigation);
+  const parsedProbability = parseProbability(probability);
   const parsedChildren = parseChildren(children);
 
   return {
     [parsedBoolean]: {
       condition: parsedLine,
       ...parsedMitigation,
+      ...parsedProbability,
       ...parsedChildren,
     },
   };

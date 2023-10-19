@@ -1,6 +1,6 @@
 __Attacker's goal__
   - method which in order to be viable
-    + requires this condition to be true
+    + (high) requires this condition to be true
     + and this condition which depends on either
       - x to be true
       - or y to be true
