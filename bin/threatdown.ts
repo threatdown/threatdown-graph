@@ -19,9 +19,8 @@ const {
       type: "string",
       short: "o",
     },
-    outputType: {
+    type: {
       type: "string",
-      alias: "type",
       short: "t",
       default: "mermaid",
     },
@@ -40,12 +39,12 @@ async function main () {
   const inputFile = positionals.shift();
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (!inputFile || !["json", "mermaid", "svg"].includes(values.outputType!)) {
+  if (!inputFile || !["json", "mermaid", "svg"].includes(values.type!)) {
     usage();
   } else {
     const fileContent = readFileSync(resolve(process.cwd(), inputFile), { encoding: "utf8" });
     const parsedContent = parse(fileContent);
-    if (values.outputType === "json") {
+    if (values.type === "json") {
       if (values.output) {
         writeFileSync(resolve(process.cwd(), values.output), JSON.stringify(parsedContent, null, 2));
       } else {
@@ -55,7 +54,7 @@ async function main () {
     }
 
     const mermaidContent = compileToMermaid(parsedContent);
-    if (values.outputType === "mermaid") {
+    if (values.type === "mermaid") {
       if (values.output) {
         writeFileSync(resolve(process.cwd(), values.output), mermaidContent);
       } else {
@@ -65,7 +64,7 @@ async function main () {
     }
 
     const svgContent = await renderMermaid(mermaidContent);
-    if (values.outputType === "svg") {
+    if (values.type === "svg") {
       if (values.output) {
         writeFileSync(resolve(process.cwd(), values.output), svgContent);
       } else {
