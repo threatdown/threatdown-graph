@@ -23,7 +23,12 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
 
   return (
     `<!-- ${match} --> \n` +
-
+    // Render Mermaid
+    `${
+      mdEmbeddedType === "json"
+        ? "```json\n" + JSON.stringify(jsonFormatedData) + "\n```\n"
+        : ""
+    }` +
     // Render Mermaid
     `${
       mdEmbeddedType === "mermaid"
@@ -36,7 +41,10 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
 };
 
 // generate the updated markdown file
-export const generateUpdatedMd = async (file: string, mdEmbeddedType: string) => {
+export const generateUpdatedMd = async (
+  file: string,
+  mdEmbeddedType: string
+) => {
   try {
     const threatdownMatches = file.match(threatdownRegex);
 
