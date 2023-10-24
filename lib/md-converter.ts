@@ -27,11 +27,11 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
     // Render Mermaid
     `${
       mdEmbeddedType === "mermaid"
-        ? "## MERMAID \n" + "```mermaid\n" + mermaidRaw + "\n```\n"
+        ? "```mermaid\n" + mermaidRaw + "\n```\n"
         : ""
     }` +
     // Render SVG
-    `${mdEmbeddedType === "svg" ? "## SVG \n" + "\n" + mermaidSvg + "\n" : ""}`
+    `${mdEmbeddedType === "svg" ? "\n" + mermaidSvg + "\n" : ""}`
   );
 };
 

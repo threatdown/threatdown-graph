@@ -77,6 +77,7 @@ async function main () {
       } else {
         console.log(svgContent);
       }
+      return;
     }
 
     //!! untested yet
@@ -91,6 +92,7 @@ async function main () {
           console.log(updatedMarkdown);
         }
       }
+      return;
     }
   }
 }
