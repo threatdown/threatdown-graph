@@ -182,3 +182,5 @@ export function parseLine (line: string | string[]): string {
 
   return line;
 }
+
+export const threatdownRegex = /```threatdown([\s\S]*?)```/g;

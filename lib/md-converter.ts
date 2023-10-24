@@ -2,16 +2,14 @@ import { parse } from "./parser/index";
 import { compileToMermaid } from "./compiler";
 import { renderMermaid } from "./renderer";
 import fs from "fs";
-// TODO
-// remove this, local dev
-const file = fs.readFileSync("./test.md", "utf8");
+import { threatdownRegex } from "./parser/helpers";
 
 const getMermaid = async (mermaidFormatedData: string): Promise<string> => {
   const testSvg = await renderMermaid(mermaidFormatedData);
   return testSvg;
 };
 
-// This function will actually crete the svg and json files
+// This function will actually crete the svg and json files and write to system
 const getThreatdownContent = (trimmedContent: string) => {
   const jsonFormatedData = parse(trimmedContent);
   writeFileType(JSON.stringify(jsonFormatedData), "json");
@@ -45,31 +43,21 @@ const processMatchAsync = async (match: string) => {
   const jsonFormatedData = parse(cleanMatch);
   const mermaidData = compileToMermaid(jsonFormatedData);
 
-  // Define an asynchronous function to get the Mermaid SVG
-  const getMermaidAsync = async (mermaidData: string) => {
-    try {
-      const res = await getMermaid(mermaidData);
-      return res;
-    } catch (err) {
-      console.error(err);
-      return "";
-    }
-  };
-
-  const mermaidSvg = await getMermaidAsync(mermaidData);
+  const mermaidSvg = await getMermaid(mermaidData);
 
   return (
     `<!-- ${match} --> \n` +
-    "## JSON \n" +
     // Render JSON
+    "## JSON \n" +
     "```json\n" +
     JSON.stringify(jsonFormatedData) +
     "\n```\n" +
-    "## MERMAID \n" +
     // Render Mermaid
+    "## MERMAID \n" +
     "```mermaid\n" +
     mermaidData +
     "\n```\n" +
+    // Render SVG
     "## SVG \n" +
     "\n" +
     mermaidSvg +
@@ -78,22 +66,13 @@ const processMatchAsync = async (match: string) => {
 };
 
 // This function takes a file as input and update it adding the svg and json
-const generateUpdateMd = (file: string) => {
-  const threatdownRegex = /```threatdown([\s\S]*?)```/g;
+const generateUpdatedMd = (filePath: string) => {
+  const file = fs.readFileSync(filePath, "utf8");
   const threatdownMatches = file.match(threatdownRegex);
-  console.log(threatdownMatches);
 
   if (!threatdownMatches) {
     throw new Error("No threatdown content found");
   }
-
-  threatdownMatches.forEach((threatdownContent: string) => {
-    const trimmedContent = threatdownContent
-      .trim()
-      .replace(/^```threatdown/, "")
-      .replace(/```$/, "");
-    console.log("trimmedContent", trimmedContent);
-  });
 
   const newFilePromises = threatdownMatches.map(processMatchAsync);
   Promise.all(newFilePromises)
@@ -115,4 +94,4 @@ const generateUpdateMd = (file: string) => {
 
 // TODO
 // remove this, local dev
-generateUpdateMd(file);
+generateUpdatedMd("./test.md");

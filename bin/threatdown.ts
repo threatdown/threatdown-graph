@@ -39,7 +39,7 @@ async function main () {
   const inputFile = positionals.shift();
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (!inputFile || !["json", "mermaid", "svg"].includes(values.type!)) {
+  if (!inputFile || !["json", "mermaid", "svg"].includes(values.type!)) { // TODO add md as option here
     usage();
   } else {
     const fileContent = readFileSync(resolve(process.cwd(), inputFile), { encoding: "utf8" });
@@ -70,6 +70,10 @@ async function main () {
       } else {
         console.log(svgContent);
       }
+    }
+
+    if (values.type === "md") {
+      // TODO
     }
   }
 }
