@@ -3,6 +3,10 @@ import { compileToMermaid } from "./compiler";
 import { renderMermaid } from "./renderer";
 import fs from "fs";
 
+// TODO/ remove this later:
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 const threatdownRegex = /```threatdown([\s\S]*?)```/g;
 const getMermaid = async (mermaidFormatedData: string): Promise<string> => {
   const testSvg = await renderMermaid(mermaidFormatedData);
@@ -35,49 +39,49 @@ const writeFileType = (svg: string, type: string) => {
 };
 
 // Define an asynchronous function to process each match
-//TODO: Define if we want to add all type or dynamically chose
-const processMatchAsync = async (match: string) => {
+const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
   const cleanMatch = match
     .trim()
     .replace(/^```threatdown/, "")
     .replace(/```$/, "");
   const jsonFormatedData = parse(cleanMatch);
   const mermaidData = compileToMermaid(jsonFormatedData);
-
   const mermaidSvg = await getMermaid(mermaidData);
 
   return (
     `<!-- ${match} --> \n` +
     // Render JSON
-    "## JSON \n" +
-    "```json\n" +
-    JSON.stringify(jsonFormatedData) +
-    "\n```\n" +
+    `${
+      mdEmbeddedType === "json"
+        ? "## JSON \n" +
+          "```json\n" +
+          JSON.stringify(jsonFormatedData) +
+          "\n```\n"
+        : ""
+    }` +
     // Render Mermaid
-    "## MERMAID \n" +
-    "```mermaid\n" +
-    mermaidData +
-    "\n```\n" +
+    `${
+      mdEmbeddedType === "mermaid"
+        ? "## MERMAID \n" + "```mermaid\n" + mermaidData + "\n```\n"
+        : ""
+    }` +
     // Render SVG
-    "## SVG \n" +
-    "\n" +
-    mermaidSvg +
-    "\n"
+    `${mdEmbeddedType === "svg" ? "## SVG \n" + "\n" + mermaidSvg + "\n" : ""}`
   );
 };
 
 // generate the updated markdown file
-export const generateUpdatedMd = async (filePath: string) => {
+export const generateUpdatedMd = async (file: string, mdEmbeddedType: string) => {
   try {
-    const file = await fs.promises.readFile(filePath, "utf8");
-
     const threatdownMatches = file.match(threatdownRegex);
 
     if (!threatdownMatches) {
       throw new Error("No threatdown content found");
     }
 
-    const newFilePromises = threatdownMatches.map(processMatchAsync);
+    const newFilePromises = threatdownMatches.map((match) =>
+      processMatchAsync(match, mdEmbeddedType)
+    );
     const newFileContentArray = await Promise.all(newFilePromises);
 
     let newFile = file;
@@ -94,10 +98,11 @@ export const generateUpdatedMd = async (filePath: string) => {
 
 // TODO
 // remove this, local dev
-generateUpdatedMd("./test.md")
+const fileContent = readFileSync(resolve(process.cwd(), "./test.md"), {
+  encoding: "utf8",
+});
+generateUpdatedMd(fileContent, "mermaid")
   .then((res) => {
-    console.log(res);
-
     fs.writeFile("test-uodate.md", res, (err) => {
       if (err) throw err;
       console.log("The file has been saved!");
