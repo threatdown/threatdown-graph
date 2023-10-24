@@ -3,17 +3,25 @@ import { compileToMermaid } from "./compiler";
 import { renderMermaid } from "./renderer";
 
 const threatdownRegex = /```threatdown([\s\S]*?)```/g;
+
 const getMermaidSvg = async (mermaidFormatedData: string): Promise<string> => {
   const testSvg = await renderMermaid(mermaidFormatedData);
   return testSvg;
 };
 
-// Define an asynchronous function to process each match
-const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
-  const cleanMatch = match
+const cleanThreatdownBlocks = (input: string) => {
+  return input
     .trim()
     .replace(/^```threatdown/, "")
     .replace(/```$/, "");
+};
+
+// Define an asynchronous function to process each match
+const processMatchAsync = async (
+  match: string,
+  mdEmbeddedType: string
+): Promise<string> => {
+  const cleanMatch = cleanThreatdownBlocks(match);
   const jsonFormatedData = parse(cleanMatch);
   const mermaidRaw = compileToMermaid(jsonFormatedData);
   let mermaidSvg = "";
@@ -44,7 +52,7 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
 export const generateUpdatedMd = async (
   file: string,
   mdEmbeddedType: string
-) => {
+): Promise<string> => {
   try {
     const threatdownMatches = file.match(threatdownRegex);
 
