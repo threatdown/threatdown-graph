@@ -1,41 +1,11 @@
 import { parse } from "./parser/index";
 import { compileToMermaid } from "./compiler";
 import { renderMermaid } from "./renderer";
-import fs from "fs";
-
-// TODO/ remove this later:
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
 const threatdownRegex = /```threatdown([\s\S]*?)```/g;
 const getMermaid = async (mermaidFormatedData: string): Promise<string> => {
   const testSvg = await renderMermaid(mermaidFormatedData);
   return testSvg;
-};
-
-// This function will actually crete the svg and json files and write to system
-const getThreatdownContent = (trimmedContent: string) => {
-  const jsonFormatedData = parse(trimmedContent);
-  writeFileType(JSON.stringify(jsonFormatedData), "json");
-
-  const mermaidFormatedData = compileToMermaid(jsonFormatedData);
-
-  // returns the svg
-  getMermaid(mermaidFormatedData)
-    .then((res: string) => {
-      writeFileType(res, "svg");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
-// This function write the svg and json files
-const writeFileType = (svg: string, type: string) => {
-  fs.writeFile(`threatdown-${Date.now()}.${type}`, svg, (err) => {
-    if (err) throw err;
-    console.log("The file has been saved!");
-  });
 };
 
 // Define an asynchronous function to process each match
@@ -95,19 +65,3 @@ export const generateUpdatedMd = async (file: string, mdEmbeddedType: string) =>
     throw err;
   }
 };
-
-// TODO
-// remove this, local dev
-const fileContent = readFileSync(resolve(process.cwd(), "./test.md"), {
-  encoding: "utf8",
-});
-generateUpdatedMd(fileContent, "mermaid")
-  .then((res) => {
-    fs.writeFile("test-uodate.md", res, (err) => {
-      if (err) throw err;
-      console.log("The file has been saved!");
-    });
-  })
-  .catch((err) => {
-    console.error(err);
-  });
