@@ -23,7 +23,7 @@ function usage() {
   console.log(`Usage: threatdown <filename>
 
   --output <output>  Write result to file <output>
-  --type <type>      Change output type, must be one of "json", "mermaid", "svg"
+  --type <type>      Change output type, must be one of "json", "mermaid" or "svg"
 `);
 }
 
