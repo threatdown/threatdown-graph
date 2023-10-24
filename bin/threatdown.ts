@@ -7,6 +7,7 @@ import {
   parse,
   compileToMermaid,
   renderMermaid,
+  generateUpdatedMd,
 } from "../lib";
 
 const {
@@ -31,15 +32,16 @@ function usage () {
   console.log(`Usage: threatdown <filename>
 
   --output <output>  Write result to file <output>
-  --type <type>      Change output type, must be one of "json", "mermaid" or "svg"
+  --type <type>      Change output type, must be one of "json", "mermaid", "svg" or "md"
 `);
 }
 
 async function main () {
+
   const inputFile = positionals.shift();
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (!inputFile || !["json", "mermaid", "svg"].includes(values.type!)) { // TODO add md as option here
+  if (!inputFile || !["json", "mermaid", "svg", "md"].includes(values.type!)) { // TODO add md as option here
     usage();
   } else {
     const fileContent = readFileSync(resolve(process.cwd(), inputFile), { encoding: "utf8" });
@@ -72,8 +74,14 @@ async function main () {
       }
     }
 
+    //!! untested yet
+    const updatedMarkdown = await generateUpdatedMd(inputFile);
     if (values.type === "md") {
-      // TODO
+      if (values.output) {
+        writeFileSync(resolve(process.cwd(), values.output), updatedMarkdown);
+      } else {
+        console.log(updatedMarkdown);
+      }
     }
   }
 }

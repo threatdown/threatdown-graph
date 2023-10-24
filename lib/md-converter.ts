@@ -2,8 +2,8 @@ import { parse } from "./parser/index";
 import { compileToMermaid } from "./compiler";
 import { renderMermaid } from "./renderer";
 import fs from "fs";
-import { threatdownRegex } from "./parser/helpers";
 
+const threatdownRegex = /```threatdown([\s\S]*?)```/g;
 const getMermaid = async (mermaidFormatedData: string): Promise<string> => {
   const testSvg = await renderMermaid(mermaidFormatedData);
   return testSvg;
@@ -35,6 +35,7 @@ const writeFileType = (svg: string, type: string) => {
 };
 
 // Define an asynchronous function to process each match
+//TODO: Define if we want to add all type or dynamically chose
 const processMatchAsync = async (match: string) => {
   const cleanMatch = match
     .trim()
@@ -65,33 +66,43 @@ const processMatchAsync = async (match: string) => {
   );
 };
 
-// This function takes a file as input and update it adding the svg and json
-const generateUpdatedMd = (filePath: string) => {
-  const file = fs.readFileSync(filePath, "utf8");
-  const threatdownMatches = file.match(threatdownRegex);
+// generate the updated markdown file
+export const generateUpdatedMd = async (filePath: string) => {
+  try {
+    const file = await fs.promises.readFile(filePath, "utf8");
 
-  if (!threatdownMatches) {
-    throw new Error("No threatdown content found");
+    const threatdownMatches = file.match(threatdownRegex);
+
+    if (!threatdownMatches) {
+      throw new Error("No threatdown content found");
+    }
+
+    const newFilePromises = threatdownMatches.map(processMatchAsync);
+    const newFileContentArray = await Promise.all(newFilePromises);
+
+    let newFile = file;
+    for (let i = 0; i < threatdownMatches.length; i++) {
+      newFile = newFile.replace(threatdownMatches[i], newFileContentArray[i]);
+    }
+
+    return newFile;
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
-
-  const newFilePromises = threatdownMatches.map(processMatchAsync);
-  Promise.all(newFilePromises)
-    .then((newFileContentArray) => {
-      let newFile = file;
-      for (let i = 0; i < threatdownMatches.length; i++) {
-        newFile = newFile.replace(threatdownMatches[i], newFileContentArray[i]);
-      }
-
-      fs.writeFile(`test-update.md`, newFile, (err) => {
-        if (err) throw err;
-        console.log("The file has been saved!");
-      });
-    })
-    .catch((err) => {
-      console.error(err);
-    });
 };
 
 // TODO
 // remove this, local dev
-generateUpdatedMd("./test.md");
+generateUpdatedMd("./test.md")
+  .then((res) => {
+    console.log(res);
+
+    fs.writeFile("test-uodate.md", res, (err) => {
+      if (err) throw err;
+      console.log("The file has been saved!");
+    });
+  })
+  .catch((err) => {
+    console.error(err);
+  });
