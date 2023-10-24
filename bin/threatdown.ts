@@ -10,10 +10,7 @@ import {
   generateUpdatedMd,
 } from "../lib";
 
-const {
-  values,
-  positionals,
-} = parseArgs({
+const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     output: {
@@ -28,11 +25,11 @@ const {
     mdEmbeddedType: {
       type: "string",
       default: "mermaid",
-    }
+    },
   },
 });
 
-function usage () {
+function usage() {
   console.log(`Usage: threatdown <filename>
 
   --output <output>  Write result to file <output>
@@ -41,19 +38,44 @@ function usage () {
 `);
 }
 
-async function main () {
-
+async function main() {
   const inputFile = positionals.shift();
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (!inputFile || !["json", "mermaid", "svg", "md"].includes(values.type!)) { // TODO add md as option here
+  if (!inputFile || !["json", "mermaid", "svg", "md"].includes(values.type!)) {
     usage();
   } else {
-    const fileContent = readFileSync(resolve(process.cwd(), inputFile), { encoding: "utf8" });
+    const fileContent = readFileSync(resolve(process.cwd(), inputFile), {
+      encoding: "utf8",
+    });
+
+    if (values.type === "md") {
+      if (
+        !values.mdEmbeddedType ||
+        !["mermaid", "svg"].includes(values.mdEmbeddedType)
+      ) {
+        usage();
+      } else {
+        const updatedMarkdown = await generateUpdatedMd(
+          fileContent,
+          values.mdEmbeddedType
+        );
+        if (values.output) {
+          writeFileSync(resolve(process.cwd(), values.output), updatedMarkdown);
+        } else {
+          console.log(updatedMarkdown);
+        }
+      }
+      return;
+    }
+
     const parsedContent = parse(fileContent);
     if (values.type === "json") {
       if (values.output) {
-        writeFileSync(resolve(process.cwd(), values.output), JSON.stringify(parsedContent, null, 2));
+        writeFileSync(
+          resolve(process.cwd(), values.output),
+          JSON.stringify(parsedContent, null, 2)
+        );
       } else {
         console.log(JSON.stringify(parsedContent, null, 2));
       }
@@ -76,21 +98,6 @@ async function main () {
         writeFileSync(resolve(process.cwd(), values.output), svgContent);
       } else {
         console.log(svgContent);
-      }
-      return;
-    }
-
-    //!! untested yet
-    if (values.type === "md") {
-      if (!values.mdEmbeddedType || !["mermaid", "svg"].includes(values.mdEmbeddedType)) {
-        usage();
-      } else {
-        const updatedMarkdown = await generateUpdatedMd(fileContent, values.mdEmbeddedType);
-        if (values.output) {
-          writeFileSync(resolve(process.cwd(), values.output), updatedMarkdown);
-        } else {
-          console.log(updatedMarkdown);
-        }
       }
       return;
     }
