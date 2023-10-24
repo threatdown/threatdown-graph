@@ -20,15 +20,6 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
 
   return (
     `<!-- ${match} --> \n` +
-    // Render JSON
-    `${
-      mdEmbeddedType === "json"
-        ? "## JSON \n" +
-          "```json\n" +
-          JSON.stringify(jsonFormatedData) +
-          "\n```\n"
-        : ""
-    }` +
     // Render Mermaid
     `${
       mdEmbeddedType === "mermaid"

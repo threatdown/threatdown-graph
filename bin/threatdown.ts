@@ -37,7 +37,7 @@ function usage () {
 
   --output <output>  Write result to file <output>
   --type <type>      Change output type, must be one of "json", "mermaid", "svg" or "md"
-  --mdEmbeddedType <type>    Choose the mdEmbeddedType you want in the updated Markdown  must be one of "json", "mermaid", "svg"
+  --mdEmbeddedType <type>    Choose the mdEmbeddedType you want in the updated Markdown  must be one of "mermaid", "svg"
 `);
 }
 
@@ -81,7 +81,7 @@ async function main () {
 
     //!! untested yet
     if (values.type === "md") {
-      if (!values.mdEmbeddedType || !["json", "mermaid", "svg"].includes(values.mdEmbeddedType)) {
+      if (!values.mdEmbeddedType || !["mermaid", "svg"].includes(values.mdEmbeddedType)) {
         usage();
       } else {
         const updatedMarkdown = await generateUpdatedMd(fileContent, values.mdEmbeddedType);
