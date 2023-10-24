@@ -16,7 +16,10 @@ const processMatchAsync = async (match: string, mdEmbeddedType: string) => {
     .replace(/```$/, "");
   const jsonFormatedData = parse(cleanMatch);
   const mermaidRaw = compileToMermaid(jsonFormatedData);
-  const mermaidSvg = await getMermaidSvg(mermaidRaw);
+  let mermaidSvg = "";
+  if (mdEmbeddedType === "svg") {
+    mermaidSvg = await getMermaidSvg(mermaidRaw);
+  }
 
   return (
     `<!-- ${match} --> \n` +
