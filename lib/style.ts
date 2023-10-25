@@ -11,6 +11,7 @@ export const css = `
 // these styles get inlined into the mermaid code
 export const styles = {
   dark: {
+    background: "black",
     objective: "stroke:#880000",
     condition: "stroke:#008800",
     assumption: "stroke:#000088",
@@ -24,6 +25,7 @@ export const styles = {
     },
   },
   light: {
+    background: "white",
     objective: "stroke:#FF0000",
     condition: "stroke:#00FF00",
     assumption: "stroke:#0000FF",
