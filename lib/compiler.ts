@@ -22,7 +22,6 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
   let lineCount = 0;
   const theme = options?.theme ?? "dark";
   const color = options?.color ?? true;
-  console.error({ theme, color, options });
   const positionByIdentifier = new Map<string, number>();
   const lines: string[] = [];
   const styleModifiers: Record<string, string[]> = {};
@@ -56,38 +55,44 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
     indentMultiplier -= 1;
   }
 
+  const objectiveClass = color ? ":::objective" : "";
+  const conditionClass = color ? ":::condition" : "";
+  const assumptionClass = color ? ":::assumption" : "";
+  const booleanOrClass = color ? ":::booleanOr": "";
+  const booleanAndClass = color ? ":::booleanAnd": "";
+
   function addNode (node: Node) {
     if (node.objective) {
-      addLine(`${nextIdentifier(false)}{${node.objective}}:::objective`);
+      addLine(`${nextIdentifier(false)}{${node.objective}}${objectiveClass}`);
       lineCount++;
     } else if (node.condition) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}(${node.condition}):::condition`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}(${node.condition})${conditionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
           lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}(${node.condition}):::condition`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}(${node.condition})${conditionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
           lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${nextIdentifier(true)}(${node.condition}):::condition`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}(${node.condition})${conditionClass}`);
         lineCount++;
       }
     } else if (node.assumption) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
           lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
           lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
         lineCount++;
       }
     }
@@ -101,7 +106,7 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
       dedent();
     } else if (orCount > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((OR))):::booleanOr`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((OR)))${booleanOrClass}`);
       lineCount++;
       indent();
       // non-null assertion safe due to length check above
@@ -122,7 +127,7 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
       dedent();
     } else if (andLength > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((AND))):::booleanAnd`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((AND)))${booleanAndClass}`);
       lineCount++;
       indent();
       // non-null assertion safe due to length check above

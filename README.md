@@ -43,27 +43,27 @@ __Root attacker goal__
 
 ```
 
-From which threatdown will produce:
+From which threatdown-graph will produce:
 
 ```mermaid
 flowchart TD
-  A0{Root attacker goal}:::objective
-    A0---B1(((OR))):::booleanOr
-      B1---C1(method which in order to be viable):::condition
-        C1---D1(((AND))):::booleanAnd
-          D1---E1(requires both this condition to be true):::condition
-            E1---F1(((AND))):::booleanAnd
-              F1-. mitigated by .-G1(TODO that would mitigate this):::condition
-              F1-- mitigated by ---G2(install condition blocker (#31, #35)):::condition
-          D1---E2(AND this condition, which depends on either):::condition
-            E2---F2(((OR))):::booleanOr
-              F2---G3(x to be true):::condition
-              F2---G4(or y to be true):::condition
-      B1---C2(another method ):::condition
-        C2---D2(((OR))):::booleanOr
-          D2---E3(a condition that depends on some assumptions):::condition
-            E3---F3(((AND))):::booleanAnd
-              F3---G5>this might be a problem]:::assumption
-              F3---G6>but only if this is also a problem]:::assumption
-          D2---E4(another condition):::condition
+  A0{Root attacker goal}
+    A0---B1(((OR)))
+      B1---C1(method which in order to be viable)
+        C1---D1(((AND)))
+          D1---E1(requires both this condition to be true)
+            E1---F1(((AND)))
+              F1-. mitigated by .-G1(TODO that would mitigate this)
+              F1-- mitigated by ---G2(install condition blocker (#31, #35))
+          D1---E2(AND this condition, which depends on either)
+            E2---F2(((OR)))
+              F2---G3(x to be true)
+              F2---G4(or y to be true)
+      B1---C2(another method )
+        C2---D2(((OR)))
+          D2---E3(a condition that depends on some assumptions)
+            E3---F3(((AND)))
+              F3---G5>this might be a problem]
+              F3---G6>but only if this is also a problem]
+          D2---E4(another condition)
 ```
