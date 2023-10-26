@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 interface RenderOptions {
-  theme: "dark" | "light";
+  theme?: "dark" | "light";
+  color?: boolean;
 }
 
 import { css, styles } from "./style";
@@ -13,6 +14,7 @@ export async function renderMermaid (contents: string, options?: RenderOptions):
   const tmpOutput = join(tmpdir(), `.threatdown-${Date.now()}.svg`);
   const tmpCss = join(tmpdir(), ".threatdown.css");
   const theme = options?.theme ?? "dark";
+  const color = options?.color ?? true;
   await writeFile(tmpCss, css);
 
   let res: (value?: unknown) => void;
@@ -22,7 +24,11 @@ export async function renderMermaid (contents: string, options?: RenderOptions):
     rej = _reject;
   });
 
-  const mmdc = spawn("mmdc", ["--input", "-", "--output", tmpOutput, "--cssFile", tmpCss, "--backgroundColor", styles[theme].background], { stdio: "pipe" });
+  const args = ["--input", "-", "--output", tmpOutput];
+  if (color) {
+    args.push("--cssFile", tmpCss, "--background", styles[theme].background);
+  }
+  const mmdc = spawn("mmdc", args, { stdio: "pipe" });
 
   mmdc.on("error", (err: Error) => {
     rej(err);

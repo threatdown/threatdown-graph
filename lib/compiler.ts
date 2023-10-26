@@ -13,13 +13,15 @@ export interface Node {
 }
 
 export interface CompileOptions {
-  theme: "dark" | "light";
+  theme?: "dark" | "light";
+  color?: boolean;
 }
 
 export function compileToMermaid (tree: Node, options?: CompileOptions): string {
   let indentMultiplier = 0;
   let lineCount = 0;
   const theme = options?.theme ?? "dark";
+  const color = options?.color ?? true;
   const positionByIdentifier = new Map<string, number>();
   const lines: string[] = [];
   const styleModifiers: Record<string, string[]> = {};
@@ -53,38 +55,44 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
     indentMultiplier -= 1;
   }
 
+  const objectiveClass = color ? ":::objective" : "";
+  const conditionClass = color ? ":::condition" : "";
+  const assumptionClass = color ? ":::assumption" : "";
+  const booleanOrClass = color ? ":::booleanOr": "";
+  const booleanAndClass = color ? ":::booleanAnd": "";
+
   function addNode (node: Node) {
     if (node.objective) {
-      addLine(`${nextIdentifier(false)}{${node.objective}}:::objective`);
+      addLine(`${nextIdentifier(false)}{${node.objective}}${objectiveClass}`);
       lineCount++;
     } else if (node.condition) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}(${node.condition}):::condition`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}(${node.condition})${conditionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
           lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}(${node.condition}):::condition`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}(${node.condition})${conditionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
           lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${nextIdentifier(true)}(${node.condition}):::condition`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}(${node.condition})${conditionClass}`);
         lineCount++;
       }
     } else if (node.assumption) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
           lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
           styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
           lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}>${node.assumption}]${assumptionClass}`);
         lineCount++;
       }
     }
@@ -98,7 +106,7 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
       dedent();
     } else if (orCount > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((OR))):::booleanOr`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((OR)))${booleanOrClass}`);
       lineCount++;
       indent();
       // non-null assertion safe due to length check above
@@ -119,7 +127,7 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
       dedent();
     } else if (andLength > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((AND))):::booleanAnd`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((AND)))${booleanAndClass}`);
       lineCount++;
       indent();
       // non-null assertion safe due to length check above
@@ -136,21 +144,25 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
   indentMultiplier++;
   addNode(tree);
 
-  addLine(`classDef objective ${styles[theme].objective}`);
-  addLine(`classDef condition ${styles[theme].condition}`);
-  addLine(`classDef assumption ${styles[theme].assumption}`);
-  addLine(`classDef booleanAnd ${styles[theme].booleanAnd}`);
-  addLine(`classDef booleanOr ${styles[theme].booleanOr}`);
-  for (const [identifier, modifiers] of Object.entries(styleModifiers)) {
-    const filteredModifiers = modifiers.filter((modifier) => !!modifier); // remove empty strings
-    if (!filteredModifiers.length) {
-      continue;
-    }
+  // not sure why the linter thinks this is always true, but it's not
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (color) {
+    addLine(`classDef objective ${styles[theme].objective}`);
+    addLine(`classDef condition ${styles[theme].condition}`);
+    addLine(`classDef assumption ${styles[theme].assumption}`);
+    addLine(`classDef booleanAnd ${styles[theme].booleanAnd}`);
+    addLine(`classDef booleanOr ${styles[theme].booleanOr}`);
+    for (const [identifier, modifiers] of Object.entries(styleModifiers)) {
+      const filteredModifiers = modifiers.filter((modifier) => !!modifier); // remove empty strings
+      if (!filteredModifiers.length) {
+        continue;
+      }
 
-    addLine(`style ${identifier} ${filteredModifiers.join(",")}`);
+      addLine(`style ${identifier} ${filteredModifiers.join(",")}`);
+    }
+    // TODO: need to pre-process the tree and sort out modifiers for links instead of styling them all the same
+    addLine(`linkStyle ${[...Array(lineCount - 1).keys()].join(",")} ${styles[theme].link}`);
   }
-  // TODO: need to pre-process the tree and sort out modifiers for links instead of styling them all the same
-  addLine(`linkStyle ${[...Array(lineCount - 1).keys()].join(",")} ${styles[theme].link}`);
 
   return lines.join("\n");
 }

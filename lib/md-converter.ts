@@ -4,8 +4,8 @@ import { renderMermaid } from "./renderer";
 
 const threatdownRegex = /```threatdown([\s\S]*?)```/g;
 
-const getMermaidSvg = async (mermaidFormatedData: string): Promise<string> => {
-  const testSvg = await renderMermaid(mermaidFormatedData);
+const getMermaidSvg = async (mermaidFormatedData: string, options: GenerateUpdatedMdOptions): Promise<string> => {
+  const testSvg = await renderMermaid(mermaidFormatedData, options);
   return testSvg;
 };
 
@@ -19,14 +19,15 @@ const cleanThreatdownBlocks = (input: string) => {
 // Define an asynchronous function to process each match
 const processMatchAsync = async (
   match: string,
-  mdEmbeddedType: string
+  options: GenerateUpdatedMdOptions
 ): Promise<string> => {
+  const mdEmbeddedType = options.type;
   const cleanMatch = cleanThreatdownBlocks(match);
   const jsonFormatedData = parse(cleanMatch);
-  const mermaidRaw = compileToMermaid(jsonFormatedData);
+  const mermaidRaw = compileToMermaid(jsonFormatedData, options);
   let mermaidSvg = "";
   if (mdEmbeddedType === "svg") {
-    mermaidSvg = await getMermaidSvg(mermaidRaw);
+    mermaidSvg = await getMermaidSvg(mermaidRaw, options);
   }
 
   return (
@@ -48,10 +49,16 @@ const processMatchAsync = async (
   );
 };
 
+interface GenerateUpdatedMdOptions {
+  type: string;
+  theme?: "dark" | "light";
+  color?: boolean;
+}
+
 // generate the updated markdown file
 export const generateUpdatedMd = async (
   file: string,
-  mdEmbeddedType: string
+  options: GenerateUpdatedMdOptions
 ): Promise<string> => {
   try {
     const threatdownMatches = file.match(threatdownRegex);
@@ -61,7 +68,7 @@ export const generateUpdatedMd = async (
     }
 
     const newFilePromises = threatdownMatches.map((match) =>
-      processMatchAsync(match, mdEmbeddedType)
+      processMatchAsync(match, options)
     );
     const newFileContentArray = await Promise.all(newFilePromises);
 

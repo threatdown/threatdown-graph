@@ -13,6 +13,14 @@ import {
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
+    color: {
+      type: "boolean",
+      default: true,
+    },
+    "no-color": {
+      type: "boolean",
+      default: false,
+    },
     output: {
       type: "string",
       short: "o",
@@ -30,7 +38,8 @@ function usage() {
 
   <filename>         Must have extension \`.td\` or \`.md\`
   --output <output>  Write result to file <output>
-  --type <type>      Change output type, must be one of "json", "mermaid" or "svg"
+  --type <type>      Change output type, must be one of "json", "mermaid" or "svg", defaults to "mermaid"
+  --color/--no-color Enable or disable styling of results, defaults to \`true\`
 `);
 }
 
@@ -59,8 +68,10 @@ async function main() {
     encoding: "utf8",
   });
 
+  const color = values["no-color"] ? false : values.color;
+
   if (inputFileExt === ".md") {
-    const markdownContent = await generateUpdatedMd(fileContent, values.type);
+    const markdownContent = await generateUpdatedMd(fileContent, { type: values.type, color });
     if (values.output) {
       writeFileSync(resolve(process.cwd(), values.output), markdownContent);
     } else {
@@ -78,7 +89,7 @@ async function main() {
       return;
     }
 
-    const mermaidContent = compileToMermaid(parsedContent);
+    const mermaidContent = compileToMermaid(parsedContent, { color });
     if (values.type === "mermaid") {
       if (values.output) {
         writeFileSync(resolve(process.cwd(), values.output), mermaidContent);
@@ -89,7 +100,7 @@ async function main() {
       return;
     }
 
-    const svgContent = await renderMermaid(mermaidContent);
+    const svgContent = await renderMermaid(mermaidContent, { color });
     if (values.type === "svg") {
       if (values.output) {
         writeFileSync(resolve(process.cwd(), values.output), svgContent);
