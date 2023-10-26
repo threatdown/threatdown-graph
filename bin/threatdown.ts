@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { generateUpdatedMd } from "../lib";
+
+import {
+  parse,
+  compileToMermaid,
+  generateUpdatedMd,
+  renderMermaid,
+} from "../lib";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -20,35 +26,78 @@ const { values, positionals } = parseArgs({
 });
 
 function usage() {
-  console.log(`Usage: threatdown <filename> ( must be a markdown file )
+  console.log(`Usage: threatdown <filename>
 
+  <filename>         Must have extension \`.td\` or \`.md\`
   --output <output>  Write result to file <output>
   --type <type>      Change output type, must be one of "json", "mermaid" or "svg"
 `);
 }
 
 async function main() {
-  const inputFile = positionals.shift();
+  if (positionals.length !== 1) {
+    return usage();
+  }
+
+  // non-null assertion safe because we already checked for length
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const inputFile = positionals.shift()!;
+  const inputFileExt = extname(inputFile);
+
   // non-null assertion safe because the outputType has a default
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   if (
-    !inputFile ||
     !values.type ||
     !["json", "mermaid", "svg"].includes(values.type) ||
-    !inputFile.includes(".md")
+    ![".md", ".td"].includes(inputFileExt)
   ) {
-    usage();
-  } else {
-    const fileContent = readFileSync(resolve(process.cwd(), inputFile), {
-      encoding: "utf8",
-    });
-    const updatedMarkdown = await generateUpdatedMd(fileContent, values.type);
+    process.exitCode = 1;
+    return usage();
+  }
+
+  const fileContent = readFileSync(resolve(process.cwd(), inputFile), {
+    encoding: "utf8",
+  });
+
+  if (inputFileExt === ".md") {
+    const markdownContent = await generateUpdatedMd(fileContent, values.type);
     if (values.output) {
-      const safeOutput = values.output.includes(".md") ? values.output : `${values.output}.md`;
-      writeFileSync(resolve(process.cwd(), safeOutput), updatedMarkdown);
+      writeFileSync(resolve(process.cwd(), values.output), markdownContent);
     } else {
-      console.log(updatedMarkdown);
+      console.log(markdownContent);
     }
+  } else if (inputFileExt === ".td") {
+    const parsedContent = parse(fileContent);
+    if (values.type === "json") {
+      if (values.output) {
+        writeFileSync(resolve(process.cwd(), values.output), JSON.stringify(parsedContent, null, 2));
+      } else {
+        console.log(JSON.stringify(parsedContent, null, 2));
+      }
+
+      return;
+    }
+
+    const mermaidContent = compileToMermaid(parsedContent);
+    if (values.type === "mermaid") {
+      if (values.output) {
+        writeFileSync(resolve(process.cwd(), values.output), mermaidContent);
+      } else {
+        console.log(mermaidContent);
+      }
+
+      return;
+    }
+
+    const svgContent = await renderMermaid(mermaidContent);
+    if (values.type === "svg") {
+      if (values.output) {
+        writeFileSync(resolve(process.cwd(), values.output), svgContent);
+      } else {
+        console.log(svgContent);
+      }
+    }
+
     return;
   }
 }
