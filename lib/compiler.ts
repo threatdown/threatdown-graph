@@ -13,13 +13,16 @@ export interface Node {
 }
 
 export interface CompileOptions {
-  theme: "dark" | "light";
+  theme?: "dark" | "light";
+  color?: boolean;
 }
 
 export function compileToMermaid (tree: Node, options?: CompileOptions): string {
   let indentMultiplier = 0;
   let lineCount = 0;
   const theme = options?.theme ?? "dark";
+  const color = options?.color ?? true;
+  console.error({ theme, color, options });
   const positionByIdentifier = new Map<string, number>();
   const lines: string[] = [];
   const styleModifiers: Record<string, string[]> = {};
@@ -136,21 +139,25 @@ export function compileToMermaid (tree: Node, options?: CompileOptions): string 
   indentMultiplier++;
   addNode(tree);
 
-  addLine(`classDef objective ${styles[theme].objective}`);
-  addLine(`classDef condition ${styles[theme].condition}`);
-  addLine(`classDef assumption ${styles[theme].assumption}`);
-  addLine(`classDef booleanAnd ${styles[theme].booleanAnd}`);
-  addLine(`classDef booleanOr ${styles[theme].booleanOr}`);
-  for (const [identifier, modifiers] of Object.entries(styleModifiers)) {
-    const filteredModifiers = modifiers.filter((modifier) => !!modifier); // remove empty strings
-    if (!filteredModifiers.length) {
-      continue;
-    }
+  // not sure why the linter thinks this is always true, but it's not
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (color) {
+    addLine(`classDef objective ${styles[theme].objective}`);
+    addLine(`classDef condition ${styles[theme].condition}`);
+    addLine(`classDef assumption ${styles[theme].assumption}`);
+    addLine(`classDef booleanAnd ${styles[theme].booleanAnd}`);
+    addLine(`classDef booleanOr ${styles[theme].booleanOr}`);
+    for (const [identifier, modifiers] of Object.entries(styleModifiers)) {
+      const filteredModifiers = modifiers.filter((modifier) => !!modifier); // remove empty strings
+      if (!filteredModifiers.length) {
+        continue;
+      }
 
-    addLine(`style ${identifier} ${filteredModifiers.join(",")}`);
+      addLine(`style ${identifier} ${filteredModifiers.join(",")}`);
+    }
+    // TODO: need to pre-process the tree and sort out modifiers for links instead of styling them all the same
+    addLine(`linkStyle ${[...Array(lineCount - 1).keys()].join(",")} ${styles[theme].link}`);
   }
-  // TODO: need to pre-process the tree and sort out modifiers for links instead of styling them all the same
-  addLine(`linkStyle ${[...Array(lineCount - 1).keys()].join(",")} ${styles[theme].link}`);
 
   return lines.join("\n");
 }
