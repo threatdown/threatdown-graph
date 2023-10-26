@@ -25,7 +25,7 @@ Threatdown is an open standard that can be interpreted into a [mermaid](https://
 
 Threatdown looks like this:
 
-<!-- ```threatdown
+```threatdown
 
 __Root attacker goal__
 - method which in order to be viable
@@ -41,7 +41,10 @@ __Root attacker goal__
      +? but only if this is also a problem
   - another condition
 
-``` --> 
+```
+
+From which threatdown-graph will produce:
+
 ```mermaid
 flowchart TD
   A0{Root attacker goal}
@@ -64,6 +67,3 @@ flowchart TD
               F3---G6>but only if this is also a problem]
           D2---E4(another condition)
 ```
- 
-
-From which threatdown-graph will produce:
