@@ -28,7 +28,7 @@ const { values, positionals } = parseArgs({
     type: {
       type: "string",
       short: "t",
-      default: "svg",
+      default: "mermaid",
     },
   },
 });
@@ -38,7 +38,7 @@ function usage() {
 
   <filename>         Must have extension \`.td\` or \`.md\`
   --output <output>  Write result to file <output>
-  --type <type>      Change output type, must be one of "json", "mermaid" or "svg", defaults to "svg"
+  --type <type>      Change output type, must be one of "json", "mermaid" or "svg", defaults to "mermaid"
   --color/--no-color Enable or disable styling of results, defaults to \`true\`
 `);
 }

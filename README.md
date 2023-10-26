@@ -14,8 +14,9 @@ When provided a threatdown file (with the extension `.td`) the entire file is pa
 
 ### Options
 
-`--type <outputType>`: outputType must be one of `json`, `mermaid` or `svg` (defaults to `mermaid`)
-`--output <outputPath>`: writes the parsed results to the file `outputPath`, if unspecified results will be logged instead of written
+- `--type <outputType>`: outputType must be one of `json`, `mermaid` or `svg` (defaults to `mermaid`)
+- `--output <outputPath>`: writes the parsed results to the file `outputPath`, if unspecified results will be logged instead of written
+- `--color/--no-color`: enable/disable styling, defaults to enabled
 
 ## What is threatdown? 
 
