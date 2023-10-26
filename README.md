@@ -25,13 +25,13 @@ Threatdown is an open standard that can be interpreted into a [mermaid](https://
 
 Threatdown looks like this:
 
-```threatdown
+<!-- ```threatdown
 
 __Root attacker goal__
 - method which in order to be viable
   + requires both this condition to be true
     + [ ] TODO that would mitigate this
-    + [x] install condition blocker (#31, #35)
+    + [x] install condition blocker #31, #35
   + AND this condition, which depends on either
     - x to be true
     - or y to be true
@@ -41,10 +41,7 @@ __Root attacker goal__
      +? but only if this is also a problem
   - another condition
 
-```
-
-From which threatdown-graph will produce:
-
+``` --> 
 ```mermaid
 flowchart TD
   A0{Root attacker goal}
@@ -54,7 +51,7 @@ flowchart TD
           D1---E1(requires both this condition to be true)
             E1---F1(((AND)))
               F1-. mitigated by .-G1(TODO that would mitigate this)
-              F1-- mitigated by ---G2(install condition blocker (#31, #35))
+              F1-- mitigated by ---G2(install condition blocker #31, #35)
           D1---E2(AND this condition, which depends on either)
             E2---F2(((OR)))
               F2---G3(x to be true)
@@ -67,3 +64,6 @@ flowchart TD
               F3---G6>but only if this is also a problem]
           D2---E4(another condition)
 ```
+ 
+
+From which threatdown-graph will produce:
