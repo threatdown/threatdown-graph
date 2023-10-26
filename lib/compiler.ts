@@ -1,3 +1,5 @@
+import { styles } from "./style";
+
 export interface Node {
   assumption?: string;
   condition?: string;
@@ -7,18 +9,26 @@ export interface Node {
   comments?: string[];
   mitigation?: boolean;
   complete?: boolean;
+  probability?: string;
 }
 
-export function compileToMermaid (tree: Node): string {
+export interface CompileOptions {
+  theme: "dark" | "light";
+}
+
+export function compileToMermaid (tree: Node, options?: CompileOptions): string {
   let indentMultiplier = 0;
+  let lineCount = 0;
+  const theme = options?.theme ?? "dark";
   const positionByIdentifier = new Map<string, number>();
   const lines: string[] = [];
+  const styleModifiers: Record<string, string[]> = {};
 
   function addLine (content: string) {
     lines.push(`${"  ".repeat(indentMultiplier)}${content}`);
   }
 
-  function identifier (increment: boolean): string {
+  function nextIdentifier (increment: boolean): string {
     const identifierPrefix = String.fromCharCode(64 + indentMultiplier);
     let identifierPosition = positionByIdentifier.get(identifierPrefix) ?? 0;
     if (increment) {
@@ -45,26 +55,37 @@ export function compileToMermaid (tree: Node): string {
 
   function addNode (node: Node) {
     if (node.objective) {
-      addLine(`${identifier(false)}{${node.objective}}`);
+      addLine(`${nextIdentifier(false)}{${node.objective}}:::objective`);
+      lineCount++;
     } else if (node.condition) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${identifier(true)}(${node.condition})`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}(${node.condition}):::condition`);
+          styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
+          lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${identifier(true)}(${node.condition})`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}(${node.condition}):::condition`);
+          styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
+          lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${identifier(true)}(${node.condition})`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}(${node.condition}):::condition`);
+        lineCount++;
       }
     } else if (node.assumption) {
       if (node.mitigation) {
         if (node.complete) {
-          addLine(`${previousIdentifier()}-- mitigated by ---${identifier(true)}>${node.assumption}]`);
+          addLine(`${previousIdentifier()}-- mitigated by ---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation, styles[theme].modifiers.complete];
+          lineCount++;
         } else {
-          addLine(`${previousIdentifier()}-. mitigated by .-${identifier(true)}>${node.assumption}]`);
+          addLine(`${previousIdentifier()}-. mitigated by .-${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+          styleModifiers[nextIdentifier(false)] = [styles[theme].modifiers.mitigation];
+          lineCount++;
         }
       } else {
-        addLine(`${previousIdentifier()}---${identifier(true)}>${node.assumption}]`);
+        addLine(`${previousIdentifier()}---${nextIdentifier(true)}>${node.assumption}]:::assumption`);
+        lineCount++;
       }
     }
 
@@ -77,7 +98,8 @@ export function compileToMermaid (tree: Node): string {
       dedent();
     } else if (orCount > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${identifier(true)}(((OR)))`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((OR))):::booleanOr`);
+      lineCount++;
       indent();
       // non-null assertion safe due to length check above
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -97,7 +119,8 @@ export function compileToMermaid (tree: Node): string {
       dedent();
     } else if (andLength > 1) {
       indent();
-      addLine(`${previousIdentifier()}---${identifier(true)}(((AND)))`);
+      addLine(`${previousIdentifier()}---${nextIdentifier(true)}(((AND))):::booleanAnd`);
+      lineCount++;
       indent();
       // non-null assertion safe due to length check above
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -112,6 +135,22 @@ export function compileToMermaid (tree: Node): string {
   addLine("flowchart TD");
   indentMultiplier++;
   addNode(tree);
+
+  addLine(`classDef objective ${styles[theme].objective}`);
+  addLine(`classDef condition ${styles[theme].condition}`);
+  addLine(`classDef assumption ${styles[theme].assumption}`);
+  addLine(`classDef booleanAnd ${styles[theme].booleanAnd}`);
+  addLine(`classDef booleanOr ${styles[theme].booleanOr}`);
+  for (const [identifier, modifiers] of Object.entries(styleModifiers)) {
+    const filteredModifiers = modifiers.filter((modifier) => !!modifier); // remove empty strings
+    if (!filteredModifiers.length) {
+      continue;
+    }
+
+    addLine(`style ${identifier} ${filteredModifiers.join(",")}`);
+  }
+  // TODO: need to pre-process the tree and sort out modifiers for links instead of styling them all the same
+  addLine(`linkStyle ${[...Array(lineCount - 1).keys()].join(",")} ${styles[theme].link}`);
 
   return lines.join("\n");
 }
