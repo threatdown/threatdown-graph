@@ -20,7 +20,7 @@ const { values, positionals } = parseArgs({
 });
 
 function usage() {
-  console.log(`Usage: threatdown <filename>
+  console.log(`Usage: threatdown <filename> ( must be a markdown file )
 
   --output <output>  Write result to file <output>
   --type <type>      Change output type, must be one of "json", "mermaid" or "svg"
@@ -34,7 +34,8 @@ async function main() {
   if (
     !inputFile ||
     !values.type ||
-    !["json", "mermaid", "svg"].includes(values.type)
+    !["json", "mermaid", "svg"].includes(values.type) ||
+    !inputFile.includes(".md")
   ) {
     usage();
   } else {
