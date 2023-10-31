@@ -26,7 +26,7 @@ export async function renderMermaid (contents: string, options?: RenderOptions):
 
   const args = ["--input", "-", "--output", tmpOutput];
   if (color) {
-    args.push("--cssFile", tmpCss, "--background", styles[theme].background);
+    args.push("--cssFile", tmpCss, "--backgroundColor", styles[theme].background);
   }
   const mmdc = spawn("mmdc", args, { stdio: "pipe" });
 
