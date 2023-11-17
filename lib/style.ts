@@ -44,8 +44,8 @@ export const styles = {
     objective: `fill:${colors.n100},color:${colors.white},stroke:${colors.n60},stroke-width:${defaults.strokeWidth}`,
     condition: `fill:${colors.n100},color:${colors.white},stroke:${colors.n60},stroke-width:${defaults.strokeWidth}`,
     assumption: `fill:${colors.n100},color:${colors.white},stroke:${colors.n60},stroke-width:${defaults.strokeWidth}`,
-    booleanAnd: `fill:${colors.b80},color:${colors.white},stroke:${colors.white},stroke-width:${defaults.strokeWidth}`,
-    booleanOr: `fill:${colors.b80},color:${colors.white},stroke:${colors.white},stroke-width:${defaults.strokeWidth}`,
+    booleanAnd: `fill:${colors.b80},color:${colors.white},stroke:${colors.white},stroke-width:${defaults.strokeWidth}, padding-right: 4px`,
+    booleanOr: `fill:${colors.b80},color:${colors.white},stroke:${colors.white},stroke-width:${defaults.strokeWidth}, padding-right: 4px`,
     link: `stroke:${colors.b80},stroke-width:${defaults.strokeWidth}`,
     mitigatedLink: `stroke:${colors.b80},stroke-width:${defaults.strokeWidth}`,
     modifiers: {
